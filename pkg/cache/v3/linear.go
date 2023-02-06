@@ -17,6 +17,8 @@ package cache
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -317,12 +319,14 @@ func (cache *LinearCache) CreateWatch(request *Request, streamState stream.Strea
 	defer cache.mu.Unlock()
 
 	if err != nil {
+		fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG][CreateWatch:err: %s]: %s ; %s\n", err.Error(), request.TypeUrl, strings.Join(request.GetResourceNames(), "::"))
 		stale = true
 		staleResources = request.ResourceNames
 	} else if len(request.ResourceNames) == 0 {
 		stale = lastVersion != cache.version
 	} else {
 		for _, name := range request.ResourceNames {
+			fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG][CreateWatch:lastVersion: %d]: %s ; %s\n", lastVersion, request.TypeUrl, name)
 			// When a resource is removed, its version defaults 0 and it is not considered stale.
 			if lastVersion < cache.versionVector[name] {
 				stale = true
@@ -331,6 +335,7 @@ func (cache *LinearCache) CreateWatch(request *Request, streamState stream.Strea
 		}
 	}
 	if stale {
+		fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG][CreateWatch:stale]: %s ; staleResources(%s)\n", request.TypeUrl, strings.Join(staleResources, "::"))
 		cache.respond(value, staleResources)
 		return nil
 	}

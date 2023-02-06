@@ -194,15 +194,14 @@ func (s *server) process(str stream.Stream, reqCh <-chan *discovery.DiscoveryReq
 			}
 
 			typeURL := req.GetTypeUrl()
-			fmt.Fprintf(os.Stderr, "[ANOOPC1:GCP-DEBUG1]: %s ; %s\n", typeURL, strings.Join(req.GetResourceNames(), "::"))
-			fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG2]: %s ; %s\n", typeURL, strings.Join(req.GetResourceNames(), "::"))
+			fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG]: %s ; %s\n", typeURL, strings.Join(req.GetResourceNames(), "::"))
 			responder := make(chan cache.Response, 1)
 			if w, ok := watches.responders[typeURL]; ok {
 				// We've found a pre-existing watch, lets check and update if needed.
 				// If these requirements aren't satisfied, leave an open watch.
 				if w.nonce == "" || w.nonce == nonce {
 					w.close()
-
+					fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG][pre-existing watch]: %s ; %s\n", typeURL, strings.Join(req.GetResourceNames(), "::"))
 					watches.addWatch(typeURL, &watch{
 						cancel:   s.cache.CreateWatch(req, streamState, responder),
 						response: responder,
@@ -211,6 +210,7 @@ func (s *server) process(str stream.Stream, reqCh <-chan *discovery.DiscoveryReq
 			} else {
 				// No pre-existing watch exists, let's create one.
 				// We need to precompute the watches first then open a watch in the cache.
+				fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG][no pre-existing watch]: %s ; %s\n", typeURL, strings.Join(req.GetResourceNames(), "::"))
 				watches.addWatch(typeURL, &watch{
 					cancel:   s.cache.CreateWatch(req, streamState, responder),
 					response: responder,
