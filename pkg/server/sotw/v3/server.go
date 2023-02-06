@@ -194,7 +194,8 @@ func (s *server) process(str stream.Stream, reqCh <-chan *discovery.DiscoveryReq
 			}
 
 			typeURL := req.GetTypeUrl()
-			fmt.Fprintf(os.Stderr, "[ANOOPC1:GCP-DEBUG1]: %s ; %s", typeURL, strings.Join(req.GetResourceNames(), "::"))
+			fmt.Fprintf(os.Stderr, "[ANOOPC1:GCP-DEBUG1]: %s ; %s\n", typeURL, strings.Join(req.GetResourceNames(), "::"))
+			fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG2]: %s ; %s\n", typeURL, strings.Join(req.GetResourceNames(), "::"))
 			responder := make(chan cache.Response, 1)
 			if w, ok := watches.responders[typeURL]; ok {
 				// We've found a pre-existing watch, lets check and update if needed.
