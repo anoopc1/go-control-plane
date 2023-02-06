@@ -199,6 +199,7 @@ func (s *server) process(str stream.Stream, reqCh <-chan *discovery.DiscoveryReq
 			if w, ok := watches.responders[typeURL]; ok {
 				// We've found a pre-existing watch, lets check and update if needed.
 				// If these requirements aren't satisfied, leave an open watch.
+				fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG][pre-existing watch nonce info: %s, %s]: %s ; %s\n", w.nonce, nonce, typeURL, strings.Join(req.GetResourceNames(), "::"))
 				if w.nonce == "" || w.nonce == nonce {
 					w.close()
 					fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG][pre-existing watch]: %s ; %s\n", typeURL, strings.Join(req.GetResourceNames(), "::"))
@@ -206,6 +207,8 @@ func (s *server) process(str stream.Stream, reqCh <-chan *discovery.DiscoveryReq
 						cancel:   s.cache.CreateWatch(req, streamState, responder),
 						response: responder,
 					})
+				} else {
+					fmt.Fprintf(os.Stdout, "[ANOOPC1:GCP-DEBUG][pre-existing watch nonce mismatch]: %s ; %s\n", typeURL, strings.Join(req.GetResourceNames(), "::"))
 				}
 			} else {
 				// No pre-existing watch exists, let's create one.
