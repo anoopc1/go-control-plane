@@ -18,8 +18,11 @@ package sotw
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync/atomic"
 
 	"google.golang.org/grpc/codes"
@@ -131,7 +134,7 @@ func (s *server) process(str stream.Stream, reqCh <-chan *discovery.DiscoveryReq
 	}
 
 	// node may only be set on the first discovery request
-	var node = &core.Node{}
+	node := &core.Node{}
 
 	// recompute dynamic channels for this stream
 	watches.recompute(s.ctx, reqCh)
@@ -191,6 +194,7 @@ func (s *server) process(str stream.Stream, reqCh <-chan *discovery.DiscoveryReq
 			}
 
 			typeURL := req.GetTypeUrl()
+			fmt.Fprintf(os.Stderr, "[ANOOPC1:GCP-DEBUG1]: %s ; %s", typeURL, strings.Join(req.GetResourceNames(), "::"))
 			responder := make(chan cache.Response, 1)
 			if w, ok := watches.responders[typeURL]; ok {
 				// We've found a pre-existing watch, lets check and update if needed.
